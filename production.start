@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+# ║                                   Automated Martini Simulation with Gromacs                                    ║
+# ╟────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
+# ║ Written By: Evan Roetering                                                                                     ║
+# ║             Klauda Lab                                                                                         ║
+# ║             University of Maryland                                                                             ║
+# ║                                                                                                                ║
+# ║ Last Edit:  5/20/2026                                                                                          ║
+# ║                                                                                                                ║
+# ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+# ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+# │                                             User Input Variables                                               │
+# └────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+sim_steps=1250000000					# number of time steps in the simulation 
+n_runs=50								# number of production runs
+cores=256                               # number of cpu cores to use for production runs
+partition="scavenger"                   # partition to be used (scavenger or standard) [todo: A100, H100, bigmem]
+account="energybio-eng"                 # billing account on cluster
+email_address="eroeteri@umd.edu"        # email to send updates to
+email_info="all"                        # what should get sent to email (none, begin, end, fail, reque, all)
+
+# ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+# │                                                Execute Script                                                  │
+# └────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# ======================================== Check if Equilibration is Ready =========================================
+if [[ ! -f "./min_eq/step6.7_equilibration.gro" ]]; then
+        echo "ERROR: step6.7_equilibration.gro not found in min_eq directory"
+        exit 1
+fi
+
+# =========================================== Check if Inputs Are Valid ============================================
+if (( sim_steps % n_runs != 0 )); then
+	echo "ERROR: sim_steps not divisible by n_runs"
+	exit 1
+fi
+
+if [[ $partition != "scavenger" && $partition != "standard" ]]; then
+	echo "ERROR: ${partition} is not a valid partition, use scavenger or standard"
+	exit 1
+fi
+
+run_steps=$((sim_steps / n_runs))
+nodes=$(( (cores + 127) / 128 ))
+if (( cores == 1 )); then
+	echo "You are about to request ${cores} ${partition} CPU for ${n_runs} simulation steps"
+else
+	if (( nodes == 1 )); then
+		echo "You are about to request ${cores} CPUs across ${nodes} ${partition} node for ${n_runs} simulation steps"
+	else
+		echo "You are about to request ${cores} CPUs across ${nodes} ${partition} nodes for ${n_runs} simulation steps"
+	fi
+fi
+echo
+read -rp "Proceed? [yes/no]: " confirm
+if [[ "$confirm" != "yes" ]]; then
+        echo "Cancelling Simulation"
+        exit 0
+fi
+
+# =================================================== Copy Files ===================================================
+cp ./min_eq/index.ndx ./production/
+cp ./min_eq/system.top ./production/
+cp ./min_eq/step5_charmm2gmx.pdb ./production/
+cp ./min_eq/step6.7_equilibration.gro ./production/
+cp -r ./min_eq/toppar ./production/
+mkdir -p ./production/slurmlogs
+cd ./production
+
+# ========================================= Input Variables From .mdp File =========================================
+dt=$(grep -E '^\s*dt\s*=' "step7_production.mdp" | awk -F= '{print $2}' | xargs)
+write_freq=$(grep -E '^\s*nstlog\s*=' "step7_production.mdp" | awk -F= '{print $2}' | xargs)
+
+# ====================================== Export Controls For the Script Chain ======================================
+last_step=$(( n_runs - 1 ))
+echo "$sim_steps" > total_timesteps.txt
+echo "$run_steps" > run_timesteps.txt
+echo "$run_steps" > increment_timesteps.txt
+echo "$dt" > step_size.txt
+echo "$write_freq" > write_freq.txt
+echo "$last_step" > last_step.txt
+echo 0 > next_step.txt
+echo "$cores" > cores.txt
+echo "$partition" > partition.txt
+echo "$account" > account.txt
+echo "$email_address" > email_address.txt
+echo "$email_info" > email_info.txt
+cp step7_production.mdp step7.0_production.mdp
+sed -i "s/^nsteps[[:space:]]*=.*/nsteps                   = ${sim_steps}/" step7_production.mdp
+sed -i "s/^nsteps[[:space:]]*=.*/nsteps                   = ${run_steps}/" step7.0_production.mdp
+
+# ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+# │                                               Start Slurm Chain                                                │
+# └────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+./preprocessing.sh
