@@ -25,7 +25,7 @@
 &emsp;&emsp;&emsp; -l = flag indicating lipid is being entered for the lower leaflet (should be identical to -u flags for this step)  
 &emsp;&emsp;&emsp; -sol W = use water as solvent  
 &emsp;&emsp;&emsp; NOTE 1: Insane places in a square grid, so the sum of lipid counts in each leaflet should be a perfect square  
-&emsp;&emsp;&emsp; NOTE 2: Insane places a number of lipids based on the ratio of input numbers, to ensure proper lipid counts X and Y should equal sqrt(A*sum(leaflet counts))  
+&emsp;&emsp;&emsp; NOTE 2: Insane places a number of lipids based on the ratio of input numbers, to ensure proper lipid counts X and Y should equal $\sqrt{A*\sum_{i=residue}^{lipids}N_{i}}$  
 &emsp; e. name system and make `system.top` file using `./make_system_top.sh "\<system name\>"`  
 &emsp; f. load gromacs with `module load gromacs`  
 &emsp; g. run `gmx_mpi grompp -f ions.mdp -c membrane.gro -p system.top -o ions.tpr -maxwarn 1`  
