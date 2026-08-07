@@ -1,6 +1,6 @@
 # M3-Build-Tools
 ### Guide for Building Membrane Simulations with Martini 3 (Work in Progress)
-&emsp;│  
+&emsp;&#8202;│  
 &emsp;├──🞂 Evan Roetering  
 &emsp;├──🞂 Klauda Lab  
 &emsp;├──🞂 University of Maryland  
