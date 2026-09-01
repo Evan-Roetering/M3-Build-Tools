@@ -60,7 +60,7 @@ if [[ -f step7_production_trimmed_10.xtc ]]; then
 	cd ../analysis
 	gmx_mpi trjconv -s "input.tpr" -f "trajectory.xtc" -o frame_.gro -sep <<TRJCONV
 	0
-	TRJCONV
+TRJCONV
 	mv frame_*.gro ./gro_snapshots/
 else
 	echo "ERROR: trajectory files were not trimmed" >&2
