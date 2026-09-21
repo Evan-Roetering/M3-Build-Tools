@@ -10,7 +10,7 @@
 1. Start with a copy of the asymmetric-system template in this github on zaratan  
 2. Gather upper leaflet and lower leaflet composition in terms of concentration  
 3. Build and Simulate Symmetric systems in the `asymmetric-system/double-upper` and `asymmetric-system/double-lower` directories  
-&emsp; a. navigate to `asymmetric-system/double-\<upper/lower\>/system_build`  
+&emsp; a. navigate to `asymmetric-system/double-<upper/lower>/system_build`  
 &emsp; b. format make_toppar.sh with the lipids needed for your system  
 &emsp; c. execute make_toppar.sh  
 &emsp; d. assemble symmetric bilayer with my modified version of insane using the syntax:  
