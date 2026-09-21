@@ -40,7 +40,7 @@ $$
 &emsp;&emsp; i. use `2|3|4|...` to select all lipid species in an index with a new number  
 &emsp;&emsp; ii. use `name # MEMBRANE`, where # is the index number for the new group to give it the name MEMBRANE  
 &emsp;&emsp; iii. use `!#` to select all atoms not in the MEMBRANE group and save them under a new index number  
-&emsp;&emsp; iv. use `name #\* SOLUTE`, where #\* is the new index number, to name the group SOLUTE  
+&emsp;&emsp; iv. use `name #* SOLUTE`, where #\* is the new index number, to name the group SOLUTE  
 &emsp;&emsp; v. use `q` to save the index file as index.ndx  
 &emsp; j. run `gmx_mpi editconf -f system_ions.gro -o step5_charmm2gmx.pdb` to save in the same output format as CHARMMM-GUI  
 5. navigate up to `asymmetric-system/double-<upper/lower>` and edit `min_eq.start` with your email address and a number of cpus (I recommend 8-16 for small systems, 32-64 for medium to large system, and 128 for very large systems)  
